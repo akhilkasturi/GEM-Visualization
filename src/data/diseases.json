@@ -1,0 +1,27 @@
+{
+  "diseases": [
+    {
+      "id": "sickle-cell",
+      "name": "Sickle Cell Disease",
+      "description": "Genetic blood disorder affecting hemoglobin",
+      "regions": [
+        {
+          "country": "Nigeria",
+          "lat": 9.082,
+          "lng": 8.6753,
+          "prevalence": 24,
+          "carrierRate": 25
+        },
+        {
+          "country": "Democratic Republic of Congo",
+          "lat": -4.0383,
+          "lng": 21.7587,
+          "prevalence": 20,
+          "carrierRate": 22
+        }
+      ],
+      "evolutionaryContext": "Provides protection against malaria",
+      "geneticMarker": "HBB gene mutation"
+    }
+  ]
+}
