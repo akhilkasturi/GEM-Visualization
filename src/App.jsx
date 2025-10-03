@@ -1,51 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { feature } from 'topojson-client';
+import diseaseData from './data/diseases.json';
 
-// Sample disease data
-const diseaseData = {
-  diseases: [
-    {
-      id: 'sickle-cell',
-      name: 'Sickle Cell Disease',
-      description: 'Genetic blood disorder affecting hemoglobin',
-      color: '#ef4444',
-      regions: [
-        { country: 'Nigeria', lat: 9.082, lng: 8.6753, prevalence: 24, population: '2.4% of population' },
-        { country: 'DRC', lat: -4.0383, lng: 21.7587, prevalence: 20, population: '2.0% of population' },
-        { country: 'Cameroon', lat: 7.3697, lng: 12.3547, prevalence: 18, population: '1.8% of population' },
-      ],
-      evolutionaryContext: 'Provides protection against malaria in heterozygous carriers',
-      geneticMarker: 'HBB gene mutation'
-    },
-    {
-      id: 'lactose-intolerance',
-      name: 'Lactose Intolerance',
-      description: 'Inability to digest lactose in dairy products',
-      color: '#3b82f6',
-      regions: [
-        { country: 'China', lat: 35.8617, lng: 104.1954, prevalence: 90, population: '90% of population' },
-        { country: 'Japan', lat: 36.2048, lng: 138.2529, prevalence: 85, population: '85% of population' },
-        { country: 'South Korea', lat: 35.9078, lng: 127.7669, prevalence: 75, population: '75% of population' },
-      ],
-      evolutionaryContext: 'Lactase persistence evolved in populations with dairy farming history',
-      geneticMarker: 'LCT gene regulation'
-    },
-    {
-      id: 'g6pd-deficiency',
-      name: 'G6PD Deficiency',
-      description: 'Enzyme deficiency affecting red blood cells',
-      color: '#8b5cf6',
-      regions: [
-        { country: 'Greece', lat: 39.0742, lng: 21.8243, prevalence: 15, population: '15% of population' },
-        { country: 'Saudi Arabia', lat: 23.8859, lng: 45.0792, prevalence: 12, population: '12% of population' },
-        { country: 'India', lat: 20.5937, lng: 78.9629, prevalence: 10, population: '10% of population' },
-      ],
-      evolutionaryContext: 'Provides resistance to malaria parasites',
-      geneticMarker: 'G6PD gene mutations'
-    }
-  ]
-};
 
 // World map component showing all diseases
 const DiseaseMap = ({ diseases, onRegionClick }) => {
