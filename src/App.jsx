@@ -3,6 +3,7 @@ import * as d3 from 'd3';
 import { feature } from 'topojson-client';
 import ScrollytellingStory from './components/Scrollytelling/Story.jsx';
 import SearchFilterPanel from './components/SearchFilterPanel';
+import ColorLegend from './components/ColorLegend';
 
 // Disease data with real prevalence statistics
 const diseaseData = {
@@ -686,6 +687,11 @@ export default function App() {
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [filteredDiseases, setFilteredDiseases] = useState(diseaseData.diseases);
   const [showFilters, setShowFilters] = useState(false);
+  
+  // NEW: Track which diseases are visible
+  const [visibleDiseases, setVisibleDiseases] = useState(
+    diseaseData.diseases.map(d => d.id)
+  );
 
   const handleRegionClick = (disease, region) => {
     setSelectedDisease(disease);
@@ -703,12 +709,26 @@ export default function App() {
     setFilteredDiseases(filtered);
   };
 
+  // NEW: Toggle disease visibility
+  const handleToggleDisease = (diseaseId) => {
+    setVisibleDiseases(prev => 
+      prev.includes(diseaseId)
+        ? prev.filter(id => id !== diseaseId)
+        : [...prev, diseaseId]
+    );
+  };
+
+  // NEW: Filter diseases by visibility
+  const displayedDiseases = filteredDiseases.filter(disease => 
+    visibleDiseases.includes(disease.id)
+  );
+
   return (
     <div>
       {currentView === 'map' ? (
         <>
           <DiseaseMap 
-            diseases={filteredDiseases}
+            diseases={displayedDiseases}  // Changed from filteredDiseases
             onRegionClick={handleRegionClick}
           />
           
@@ -727,6 +747,15 @@ export default function App() {
           >
             <span>📖</span> Explore Story
           </button>
+
+          {/* NEW: Color Legend */}
+          <div className="fixed bottom-6 left-6 z-40 w-80">
+            <ColorLegend 
+              diseases={diseaseData.diseases}
+              visibleDiseases={visibleDiseases}
+              onToggleDisease={handleToggleDisease}
+            />
+          </div>
 
           {/* Filter Panel */}
           {showFilters && (
