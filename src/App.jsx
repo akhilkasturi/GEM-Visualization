@@ -351,8 +351,11 @@ const DiseaseMap = ({ diseases, onRegionClick }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-blue-50">
-        <div className="text-gray-600 text-lg">Loading world map...</div>
+      <div className="flex items-center justify-center h-screen bg-blue-50 animate-fade-in">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="text-gray-600 text-lg animate-pulse">Loading world map...</div>
+        </div>
       </div>
     );
   }
@@ -362,7 +365,7 @@ const DiseaseMap = ({ diseases, onRegionClick }) => {
       <svg ref={svgRef} className="w-full h-full" style={{ display: 'block' }} />
       {tooltip.show && (
         <div 
-          className="absolute bg-gray-900 text-white px-3 py-2 rounded-lg text-sm pointer-events-none z-50"
+          className="absolute bg-gray-900 text-white px-3 py-2 rounded-lg text-sm pointer-events-none z-50 animate-scale-in"
           style={{ left: tooltip.x + 10, top: tooltip.y + 10 }}
         >
           {tooltip.content}
@@ -606,16 +609,16 @@ const MiniDiseaseMap = ({ disease }) => {
 // Disease Detail Page
 const DiseaseDetailPage = ({ disease, region, onBack }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-8 animate-fade-in">
       <div className="max-w-6xl mx-auto">
         <button
           onClick={onBack}
-          className="mb-6 px-4 py-2 bg-white rounded-lg shadow hover:shadow-md transition-shadow flex items-center gap-2"
+          className="mb-6 px-4 py-2 bg-white rounded-lg shadow hover:shadow-md transition-all duration-200 flex items-center gap-2 hover-lift button-press animate-fade-in-down"
         >
           <span>←</span> Back to Map
         </button>
 
-        <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
+        <div className="bg-white rounded-xl shadow-lg p-8 mb-6 animate-fade-in-up">
           {/* Header */}
           <div className="border-b border-gray-200 pb-6 mb-6">
             <div className="flex items-center gap-4 mb-4">
@@ -651,19 +654,19 @@ const DiseaseDetailPage = ({ disease, region, onBack }) => {
         {/* Data Visualizations */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           {/* Bar Chart */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="bg-white rounded-xl shadow-lg p-6 animate-fade-in-up stagger-1 hover-lift transition-all duration-300">
             <PrevalenceChart disease={disease} />
           </div>
 
           {/* Mini Map */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="bg-white rounded-xl shadow-lg p-6 animate-fade-in-up stagger-2 hover-lift transition-all duration-300">
             <MiniDiseaseMap disease={disease} />
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Evolutionary Context */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="bg-white rounded-xl shadow-lg p-6 animate-fade-in-up stagger-3 hover-lift transition-all duration-300">
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">
               Evolutionary Context
             </h2>
@@ -677,16 +680,16 @@ const DiseaseDetailPage = ({ disease, region, onBack }) => {
           </div>
 
           {/* All Regions Table */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="bg-white rounded-xl shadow-lg p-6 animate-fade-in-up stagger-4 hover-lift transition-all duration-300">
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">All Affected Regions</h2>
             <div className="space-y-3 max-h-96 overflow-y-auto">
               {disease.regions.map((r, idx) => (
                 <div 
                   key={idx}
-                  className={`p-4 rounded-lg border-2 transition-all ${
+                  className={`p-4 rounded-lg border-2 transition-all duration-300 hover:shadow-md cursor-pointer ${
                     r.country === region.country
-                      ? 'border-indigo-500 bg-indigo-50'
-                      : 'border-gray-200 bg-gray-50'
+                      ? 'border-indigo-500 bg-indigo-50 shadow-sm'
+                      : 'border-gray-200 bg-gray-50 hover:border-indigo-300'
                   }`}
                 >
                   <div className="flex justify-between items-center">
@@ -727,7 +730,6 @@ export default function App() {
     return storiesAvailable.includes(diseaseId);
   };
   
-  // Track which diseases are visible
   const [visibleDiseases, setVisibleDiseases] = useState(
     diseaseData.diseases.map(d => d.id)
   );
@@ -748,7 +750,6 @@ export default function App() {
     setFilteredDiseases(filtered);
   };
 
-  // Toggle disease visibility
   const handleToggleDisease = (diseaseId) => {
     setVisibleDiseases(prev => 
       prev.includes(diseaseId)
@@ -757,7 +758,6 @@ export default function App() {
     );
   };
 
-  // Filter diseases by visibility
   const displayedDiseases = filteredDiseases.filter(disease => 
     visibleDiseases.includes(disease.id)
   );
@@ -773,19 +773,19 @@ export default function App() {
           
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="fixed top-6 left-6 z-50 px-6 py-3 bg-white hover:bg-gray-50 text-gray-900 font-semibold rounded-lg shadow-lg transition-colors flex items-center gap-2"
+            className="fixed top-6 left-6 z-50 px-6 py-3 bg-white hover:bg-gray-50 text-gray-900 font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 hover-lift button-press animate-fade-in-down"
           >
             <span>🔍</span> {showFilters ? 'Hide Filters' : 'Show Filters'}
           </button>
 
           <button
             onClick={() => setCurrentView('story-main')}
-            className="fixed top-6 right-6 z-50 px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow-lg transition-colors flex items-center gap-2"
+            className="fixed top-6 right-6 z-50 px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 hover-lift button-press animate-fade-in-down stagger-1"
           >
             <span>📖</span> Explore Story
           </button>
 
-          <div className="fixed bottom-6 left-6 z-40 w-80">
+          <div className="fixed bottom-6 left-6 z-40 w-80 animate-fade-in-up stagger-2">
             <ColorLegend 
               diseases={diseaseData.diseases}
               visibleDiseases={visibleDiseases}
@@ -794,7 +794,7 @@ export default function App() {
           </div>
 
           {showFilters && (
-            <div className="fixed top-24 left-6 z-40 w-80">
+            <div className="fixed top-24 left-6 z-40 w-80 animate-slide-in-left">
               <SearchFilterPanel 
                 diseases={diseaseData.diseases}
                 onFilterChange={handleFilterChange}
@@ -807,7 +807,7 @@ export default function App() {
           <ScrollytellingStory />
           <button
             onClick={() => setCurrentView('map')}
-            className="fixed top-6 left-6 z-50 px-6 py-3 bg-white/90 hover:bg-white text-gray-900 font-semibold rounded-lg shadow-lg transition-colors"
+            className="fixed top-6 left-6 z-50 px-6 py-3 bg-white/90 hover:bg-white text-gray-900 font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 button-press"
           >
             ← Back to Map
           </button>
@@ -825,11 +825,10 @@ export default function App() {
             onBack={handleBackToMap}
           />
           
-          {/* Story Button on Detail Page */}
           {diseaseHasStory(selectedDisease?.id) && (
             <button
               onClick={() => setCurrentView('disease-story')}
-              className="fixed top-6 right-6 z-50 px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold rounded-lg shadow-lg transition-all flex items-center gap-2"
+              className="fixed top-6 right-6 z-50 px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 hover-lift button-press animate-fade-in-down stagger-1"
             >
               <span>📖</span> Explore {selectedDisease.name} Story
             </button>
