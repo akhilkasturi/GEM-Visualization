@@ -4,6 +4,7 @@ import { feature } from 'topojson-client';
 import ScrollytellingStory from './components/Scrollytelling/Story.jsx';
 import SearchFilterPanel from './components/SearchFilterPanel';
 import ColorLegend from './components/ColorLegend';
+import DiseaseStoryPage from './components/DiseaseStoryPage';
 
 // Disease data with real prevalence statistics
 const diseaseData = {
@@ -688,6 +689,11 @@ export default function App() {
   const [filteredDiseases, setFilteredDiseases] = useState(diseaseData.diseases);
   const [showFilters, setShowFilters] = useState(false);
   
+  const diseaseHasStory = (diseaseId) => {
+    const storiesAvailable = ['sickle-cell', 'lactose-intolerance', 'thalassemia', 'g6pd-deficiency'];
+    return storiesAvailable.includes(diseaseId);
+  };
+  
   // NEW: Track which diseases are visible
   const [visibleDiseases, setVisibleDiseases] = useState(
     diseaseData.diseases.map(d => d.id)
@@ -728,11 +734,10 @@ export default function App() {
       {currentView === 'map' ? (
         <>
           <DiseaseMap 
-            diseases={displayedDiseases}  // Changed from filteredDiseases
+            diseases={displayedDiseases}
             onRegionClick={handleRegionClick}
           />
           
-          {/* Filter Toggle Button */}
           <button
             onClick={() => setShowFilters(!showFilters)}
             className="fixed top-6 left-6 z-50 px-6 py-3 bg-white hover:bg-gray-50 text-gray-900 font-semibold rounded-lg shadow-lg transition-colors flex items-center gap-2"
@@ -740,15 +745,13 @@ export default function App() {
             <span>🔍</span> {showFilters ? 'Hide Filters' : 'Show Filters'}
           </button>
 
-          {/* Story Button */}
           <button
-            onClick={() => setCurrentView('story')}
+            onClick={() => setCurrentView('story-main')}
             className="fixed top-6 right-6 z-50 px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow-lg transition-colors flex items-center gap-2"
           >
             <span>📖</span> Explore Story
           </button>
 
-          {/* NEW: Color Legend */}
           <div className="fixed bottom-6 left-6 z-40 w-80">
             <ColorLegend 
               diseases={diseaseData.diseases}
@@ -757,7 +760,6 @@ export default function App() {
             />
           </div>
 
-          {/* Filter Panel */}
           {showFilters && (
             <div className="fixed top-24 left-6 z-40 w-80">
               <SearchFilterPanel 
@@ -767,7 +769,7 @@ export default function App() {
             </div>
           )}
         </>
-      ) : currentView === 'story' ? (
+      ) : currentView === 'story-main' ? (
         <>
           <ScrollytellingStory />
           <button
@@ -777,12 +779,29 @@ export default function App() {
             ← Back to Map
           </button>
         </>
-      ) : (
-        <DiseaseDetailPage 
-          disease={selectedDisease}
-          region={selectedRegion}
-          onBack={handleBackToMap}
+      ) : currentView === 'disease-story' ? (
+        <DiseaseStoryPage 
+          diseaseId={selectedDisease.id}
+          onBack={() => setCurrentView('detail')}
         />
+      ) : (
+        <>
+          <DiseaseDetailPage 
+            disease={selectedDisease}
+            region={selectedRegion}
+            onBack={handleBackToMap}
+          />
+          
+          {/* Story Button on Detail Page */}
+          {diseaseHasStory(selectedDisease?.id) && (
+            <button
+              onClick={() => setCurrentView('disease-story')}
+              className="fixed top-6 right-6 z-50 px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold rounded-lg shadow-lg transition-all flex items-center gap-2"
+            >
+              <span>📖</span> Explore {selectedDisease.name} Story
+            </button>
+          )}
+        </>
       )}
     </div>
   );
