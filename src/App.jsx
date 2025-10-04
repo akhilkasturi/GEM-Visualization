@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { feature } from 'topojson-client';
 import ScrollytellingStory from './components/Scrollytelling/Story.jsx';
+import SearchFilterPanel from './components/SearchFilterPanel';
 
 // Disease data with real prevalence statistics
 const diseaseData = {
@@ -683,6 +684,8 @@ export default function App() {
   const [currentView, setCurrentView] = useState('map');
   const [selectedDisease, setSelectedDisease] = useState(null);
   const [selectedRegion, setSelectedRegion] = useState(null);
+  const [filteredDiseases, setFilteredDiseases] = useState(diseaseData.diseases);
+  const [showFilters, setShowFilters] = useState(false);
 
   const handleRegionClick = (disease, region) => {
     setSelectedDisease(disease);
@@ -696,14 +699,27 @@ export default function App() {
     setSelectedRegion(null);
   };
 
+  const handleFilterChange = (filtered) => {
+    setFilteredDiseases(filtered);
+  };
+
   return (
     <div>
       {currentView === 'map' ? (
         <>
           <DiseaseMap 
-            diseases={diseaseData.diseases}
+            diseases={filteredDiseases}
             onRegionClick={handleRegionClick}
           />
+          
+          {/* Filter Toggle Button */}
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="fixed top-6 left-6 z-50 px-6 py-3 bg-white hover:bg-gray-50 text-gray-900 font-semibold rounded-lg shadow-lg transition-colors flex items-center gap-2"
+          >
+            <span>🔍</span> {showFilters ? 'Hide Filters' : 'Show Filters'}
+          </button>
+
           {/* Story Button */}
           <button
             onClick={() => setCurrentView('story')}
@@ -711,6 +727,16 @@ export default function App() {
           >
             <span>📖</span> Explore Story
           </button>
+
+          {/* Filter Panel */}
+          {showFilters && (
+            <div className="fixed top-24 left-6 z-40 w-80">
+              <SearchFilterPanel 
+                diseases={diseaseData.diseases}
+                onFilterChange={handleFilterChange}
+              />
+            </div>
+          )}
         </>
       ) : currentView === 'story' ? (
         <>
