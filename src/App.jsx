@@ -197,94 +197,127 @@ const DiseaseMap = ({ diseases, onRegionClick }) => {
 
     const markersGroup = g.append('g').attr('class', 'markers');
 
-    // Function to update markers for all diseases
-    const updateMarkers = (transform) => {
-      markersGroup.selectAll('*').remove();
+// Function to update markers for all diseases
+const updateMarkers = (transform) => {
+  markersGroup.selectAll('*').remove();
 
-      const scale = transform ? transform.k : 1;
-      const markerScale = 1 / scale;
+  const scale = transform ? transform.k : 1;
+  const markerScale = 1 / scale;
 
-      // Show all diseases at once
-      diseases.forEach(disease => {
-        disease.regions.forEach(region => {
-          const [x, y] = projection([region.lng, region.lat]);
+  // Group regions by location to detect overlaps
+  const locationMap = new Map();
+  diseases.forEach(disease => {
+    disease.regions.forEach(region => {
+      const key = `${region.lat.toFixed(1)},${region.lng.toFixed(1)}`;
+      if (!locationMap.has(key)) {
+        locationMap.set(key, []);
+      }
+      locationMap.get(key).push({ disease, region });
+    });
+  });
+
+  // Show all diseases at once with smart positioning
+  diseases.forEach(disease => {
+    disease.regions.forEach(region => {
+      const [baseX, baseY] = projection([region.lng, region.lat]);
+      
+      if (!baseX || !baseY) return;
+
+      // Calculate offset for overlapping markers
+      const key = `${region.lat.toFixed(1)},${region.lng.toFixed(1)}`;
+      const overlappingMarkers = locationMap.get(key);
+      const index = overlappingMarkers.findIndex(
+        m => m.disease.id === disease.id && m.region.country === region.country
+      );
+      
+      // Create circular offset pattern for overlapping markers
+      const offsetDistance = overlappingMarkers.length > 1 ? 25 * markerScale : 0;
+      const angle = (index / overlappingMarkers.length) * 2 * Math.PI;
+      const offsetX = Math.cos(angle) * offsetDistance;
+      const offsetY = Math.sin(angle) * offsetDistance;
+      
+      const x = baseX + offsetX;
+      const y = baseY + offsetY;
+      
+      // Add glow effect
+      markersGroup.append('circle')
+        .attr('cx', x)
+        .attr('cy', y)
+        .attr('r', 20 * markerScale)
+        .attr('fill', disease.color)
+        .attr('opacity', 0.15);
+
+      markersGroup.append('circle')
+        .attr('cx', x)
+        .attr('cy', y)
+        .attr('r', 12 * markerScale)
+        .attr('fill', disease.color)
+        .attr('opacity', 0.3);
+
+      // Add marker
+      markersGroup.append('circle')
+        .attr('cx', x)
+        .attr('cy', y)
+        .attr('r', 7 * markerScale)
+        .attr('fill', disease.color)
+        .attr('stroke', '#fff')
+        .attr('stroke-width', 2.5 * markerScale)
+        .style('cursor', 'pointer')
+        .on('mouseenter', function(event) {
+          d3.select(this)
+            .transition()
+            .duration(200)
+            .attr('r', 10 * markerScale);
           
-          if (!x || !y) return;
+          setTooltip({
+            show: true,
+            x: event.pageX,
+            y: event.pageY,
+            content: `${disease.name} - ${region.country}: ${region.population}`
+          });
+        })
+        .on('mouseleave', function() {
+          d3.select(this)
+            .transition()
+            .duration(200)
+            .attr('r', 7 * markerScale);
           
-          // Add glow effect
-          markersGroup.append('circle')
-            .attr('cx', x)
-            .attr('cy', y)
-            .attr('r', 20 * markerScale)
-            .attr('fill', disease.color)
-            .attr('opacity', 0.15);
+          setTooltip({ show: false, x: 0, y: 0, content: '' });
+        })
+        .on('click', () => onRegionClick(disease, region));
 
-          markersGroup.append('circle')
-            .attr('cx', x)
-            .attr('cy', y)
-            .attr('r', 12 * markerScale)
-            .attr('fill', disease.color)
-            .attr('opacity', 0.3);
-
-          // Add marker
-          markersGroup.append('circle')
-            .attr('cx', x)
-            .attr('cy', y)
-            .attr('r', 7 * markerScale)
-            .attr('fill', disease.color)
-            .attr('stroke', '#fff')
-            .attr('stroke-width', 2.5 * markerScale)
-            .style('cursor', 'pointer')
-            .on('mouseenter', function(event) {
-              d3.select(this)
-                .transition()
-                .duration(200)
-                .attr('r', 10 * markerScale);
-              
-              setTooltip({
-                show: true,
-                x: event.pageX,
-                y: event.pageY,
-                content: `${disease.name} - ${region.country}: ${region.population}`
-              });
-            })
-            .on('mouseleave', function() {
-              d3.select(this)
-                .transition()
-                .duration(200)
-                .attr('r', 7 * markerScale);
-              
-              setTooltip({ show: false, x: 0, y: 0, content: '' });
-            })
-            .on('click', () => onRegionClick(disease, region));
-
-          // Add clickable label
-          const textGroup = markersGroup.append('g')
-            .style('cursor', 'pointer')
-            .on('click', () => onRegionClick(disease, region))
-            .on('mouseenter', function() {
-              d3.select(this).select('text')
-                .attr('fill', disease.color);
-            })
-            .on('mouseleave', function() {
-              d3.select(this).select('text')
-                .attr('fill', '#1e293b');
-            });
-
-          textGroup.append('text')
-            .attr('x', x)
-            .attr('y', y - (20 * markerScale))
-            .attr('text-anchor', 'middle')
-            .attr('font-size', `${12 * markerScale}px`)
-            .attr('font-weight', '700')
-            .attr('fill', '#1e293b')
-            .attr('stroke', '#ffffff')
-            .attr('stroke-width', `${3 * markerScale}px`)
-            .attr('paint-order', 'stroke')
-            .text(region.country);
+      // Add clickable label
+      const textGroup = markersGroup.append('g')
+        .style('cursor', 'pointer')
+        .on('click', () => onRegionClick(disease, region))
+        .on('mouseenter', function() {
+          d3.select(this).select('text')
+            .attr('fill', disease.color);
+        })
+        .on('mouseleave', function() {
+          d3.select(this).select('text')
+            .attr('fill', '#1e293b');
         });
-      });
-    };
+
+      // Position label to avoid overlap
+      const labelOffsetY = overlappingMarkers.length > 1 
+        ? -35 * markerScale + (index * 15 * markerScale)
+        : -20 * markerScale;
+
+      textGroup.append('text')
+        .attr('x', x)
+        .attr('y', y + labelOffsetY)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', `${10 * markerScale}px`)
+        .attr('font-weight', '700')
+        .attr('fill', '#1e293b')
+        .attr('stroke', '#ffffff')
+        .attr('stroke-width', `${3 * markerScale}px`)
+        .attr('paint-order', 'stroke')
+        .text(`${region.country} (${disease.name.split(' ')[0]})`);
+    });
+  });
+};
 
     updateMarkers(null);
 
