@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { feature } from 'topojson-client';
+import ScrollytellingStory from './components/Scrollytelling/Story.jsx';
 
 // Disease data with real prevalence statistics
 const diseaseData = {
@@ -698,10 +699,29 @@ export default function App() {
   return (
     <div>
       {currentView === 'map' ? (
-        <DiseaseMap 
-          diseases={diseaseData.diseases}
-          onRegionClick={handleRegionClick}
-        />
+        <>
+          <DiseaseMap 
+            diseases={diseaseData.diseases}
+            onRegionClick={handleRegionClick}
+          />
+          {/* Story Button */}
+          <button
+            onClick={() => setCurrentView('story')}
+            className="fixed top-6 right-6 z-50 px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow-lg transition-colors flex items-center gap-2"
+          >
+            <span>📖</span> Explore Story
+          </button>
+        </>
+      ) : currentView === 'story' ? (
+        <>
+          <ScrollytellingStory />
+          <button
+            onClick={() => setCurrentView('map')}
+            className="fixed top-6 left-6 z-50 px-6 py-3 bg-white/90 hover:bg-white text-gray-900 font-semibold rounded-lg shadow-lg transition-colors"
+          >
+            ← Back to Map
+          </button>
+        </>
       ) : (
         <DiseaseDetailPage 
           disease={selectedDisease}
